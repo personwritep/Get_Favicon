@@ -1,0 +1,182 @@
+// ==UserScript==
+// @name         Get Favicon 🔵
+// @namespace    http://tampermonkey.net/
+// @version      0.4
+// @description  各種のサイトでファビコンを取得する 「F2」で非表示
+// @author       You
+// @match        https://*/*
+// @exclude https://blog.ameba.jp/ucs/entry/srventry*
+// @noframes
+// @grant        none
+// ==/UserScript==
+
+
+document.addEventListener('keydown', check_key);
+
+function check_key(event){
+    if(event.keyCode==113){ // ショートカット「F2」
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        let fav_div=document.querySelector('.fav_div');
+        if(fav_div){
+            if(open==1){
+                open=0;
+                fav_div.style.visibility='hidden'; }
+            else{
+                open=1;
+                fav_div.style.visibility='visible'; }}}}
+
+
+
+let page_location=location.href; // 現在のページのURL
+let fav_request; // ファビコンを取得するためのURL
+let f_size; // ファビコンの指定サイズ
+let back=0; // パネル背景色の黒白
+let open=1; // パネルの表示・非表示
+
+
+fav_request=
+    'https://t1.gstatic.com/faviconV2?client=SOCIAL'+
+    '&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url='+ page_location;
+
+
+let help_url='https://ameblo.jp/personwritep/entry-12860094754.html';
+
+let GF_help=
+    '<a href="'+ help_url +'" target="_blank" rel="noopener noreferrer">'+
+    '<svg id="gf_help" viewBox="0 0 150 150">'+
+    '<path d="M66 13C56 15 47 18 39 24C-12 60 18 146 82 137C92 135 '+
+    '102 131 110 126C162 90 128 4 66 13M68 25C131 17 145 117 81 125C16 '+
+    '133 3 34 68 25M69 40C61 41 39 58 58 61C66 63 73 47 82 57C84 60 '+
+    '83 62 81 65C77 70 52 90 76 89C82 89 82 84 86 81C92 76 98 74 100 66'+
+    'C105 48 84 37 69 40M70 94C58 99 66 118 78 112C90 107 82 89 70 94z">'+
+    '</path></svg></a>';
+
+
+let ifr=
+    '<div class="fav_div">'+
+    '<div class="fav_frame">'+
+    '<img alt="" src='+ fav_request +'></div>'+
+    '<div id="fav_menu">'+
+    'Back：<input id="back_color" type="submit" value=" ">'+
+    'Size：'+
+    '<input id="fav_size" type="number" min="16" max="256" step="8">'+ GF_help +
+    '</div>'+
+    '<style>.fav_div { position: fixed; top: 100px; right: 40px; z-index: 20000; '+
+    'width: 240px; overflow: hidden; background: #000; border: 1px solid #666; '+
+    'box-shadow: 10px 25px 50px 0 #00000040;} '+
+    '.fav_frame { display: flex; justify-content: center; width: 240px; height: 240px; '+
+    'overflow: hidden; } '+
+    '.fav_frame img { align-self: center; } '+
+    '#fav_menu { width: 100%; padding: 10px 0; color: #000; text-align: center; '+
+    'font: normal 16px/24px Meiryo; border-top: 1px solid #666; background: #fff; } '+
+    '#fav_menu input { display: revert; box-sizing: border-box; min-width: unset; } '+
+    '#back_color { width: 30px; height: 30px; border: 1px solid #666; margin-right: 8px; '+
+    'padding: 0; border-radius: 3px; background: #000; cursor: pointer; } '+
+    '#fav_size { width: 60px; height: 30px; margin: 0; padding: 2px 2px 0; '+
+    'vertical-align: -1px; font: normal 16px/24px Meiryo; text-align: center; '+
+    'color: #000; background: revert; border: revert; border-radius: revert; } '+
+    '#gf_help { height: 18px; margin: 0 0 -4px 8px; fill: #777; cursor: pointer; }'+
+    '</style></div>';
+
+if(!document.querySelector('.fav_div')){
+    document.body.insertAdjacentHTML('beforeend', ifr); }
+
+
+setTimeout(()=>{
+    let fav_size=document.querySelector('#fav_size');
+    if(fav_size){
+        fav_size.value=img_size();
+        f_size=fav_size.value; }
+}, 200);
+
+
+
+get_favicon();
+back_color_set();
+
+
+
+function img_size(){
+    let img=document.querySelector('.fav_frame img');
+    if(img){
+        let img_width=img.getBoundingClientRect().width;
+        if(!img_width){
+            img_width=16; } // ファビコンが取得出来ない時は 16を返す
+        return Math.round(img_width); }}
+
+
+
+function get_favicon(){
+    let fav_size=document.querySelector('#fav_size');
+    if(fav_size){
+
+        document.addEventListener('keydown', function(event){
+            if(event.keyCode==13){
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                f_size=fav_size.value;
+
+                let que=fav_request.split('&');
+                if(que[que.length-1] && que[que.length-1].indexOf('size=')==0){
+                    que.pop();
+                    fav_request=que.join('&') +'&size='+ f_size; }
+                else{
+                    fav_request=fav_request +'&size='+ f_size; }
+
+                let fav_frame=document.querySelector('.fav_frame');
+                if(fav_frame){
+                    fav_frame.innerHTML='<img alt="" src='+ fav_request +'>'; }
+
+                setTimeout(()=>{
+                    fav_size.value=img_size(); }, 400); }});
+
+
+        document.addEventListener('keydown', (event)=>{ // ⇧⇩キーで inputにフォーカス
+            if(event.keyCode==40 || event.keyCode==38){
+                fav_size.focus(); }
+
+            if(event.keyCode==40 && !event.shiftKey){
+                if(fav_size.value==256){
+                    fav_size.value=136; }
+                else if(fav_size.value==128){
+                    fav_size.value=72; }
+                else if(fav_size.value==64){
+                    fav_size.value=56; }
+                else if(fav_size.value==48){
+                    fav_size.value=40; }}
+            else if(event.keyCode==40 && event.shiftKey){ ; }
+            else if(event.keyCode==38 && !event.shiftKey){
+                if(fav_size.value==128){
+                    fav_size.value=248; }
+                else if(fav_size.value==64){
+                    fav_size.value=120; }
+                else if(fav_size.value==48){
+                    fav_size.value=56; }
+                else if(fav_size.value==32){
+                    fav_size.value=40; }}
+            else if(event.keyCode==38 && event.shiftKey){ ; }
+        });
+    }} // get_favicon()
+
+
+
+function back_color_set(){
+    let fav_div=document.querySelector('.fav_div');
+    let back_color=document.querySelector('#back_color');
+    if(fav_div && back_color){
+        back_color.onclick=()=>{
+            if(back==0){
+                back=1;
+                fav_div.style.background='#fff';
+                back_color.style.background='#fff'; }
+            else{
+                back=0;
+                fav_div.style.background='#000';
+                back_color.style.background='#000'; }}}
+
+} // back_color_set()
+
+
