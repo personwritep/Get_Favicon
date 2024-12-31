@@ -102,6 +102,7 @@ setTimeout(()=>{
 
 
 get_favicon();
+clicked_focus();
 back_color_set();
 
 
@@ -141,11 +142,12 @@ function get_favicon(){
     if(fav_size){
         let interval;
 
-        document.addEventListener('keydown', (event)=>{
+        fav_size.addEventListener('keydown', (event)=>{
 
             if(event.keyCode==13){
                 event.preventDefault();
                 event.stopImmediatePropagation();
+
                 if(event.shiftKey || event.ctrlKey){ //「Shift+Enter」「Ctrl+Enter」
                     scan(256);
                     setTimeout(()=>{
@@ -248,6 +250,15 @@ function get_favicon(){
 
     } // if(fav_size)
 } // get_favicon()
+
+
+
+function clicked_focus(){
+    let fav_div=document.querySelector('.fav_div');
+    let fav_size=document.querySelector('#fav_size');
+    if(fav_div && fav_size){
+        fav_div.onclick=function(){
+            fav_size.focus(); }}}
 
 
 
