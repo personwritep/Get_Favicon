@@ -1,0 +1,92 @@
+// ==UserScript==
+// @name         Get Favicon 🔵
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  各種のサイトでファビコンを取得する
+// @author        Ameba Blog User
+// @match        https://*/*
+// @exclude      https://blog.ameba.jp/ucs/entry/srventry*
+// @noframes
+// @grant        none
+// ==/UserScript==
+
+
+let page_location=location.href; // 現在のページのURL
+if(page_location.indexOf('gstatic.com/favicon')!=-1){ // ファビコンの取得画面の場合
+        set_dialogue();
+        get_favicon(); }
+
+
+
+document.addEventListener('keydown', check_key);
+
+function check_key(event){
+    if(event.keyCode==113){ // ショートカット「F2」
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if(page_location.indexOf('gstatic.com/favicon')==-1){ // 通常のページの場合
+            let fav_request; // ファビコンを取得するためのURL
+            fav_request='https://www.google.com/s2/favicons?domain='+ page_location;
+            open(fav_request, "_blank"); }}}
+
+
+
+function set_dialogue(){
+           let menu=document.createElement('div');
+            menu.setAttribute('id', "fav_menu");
+
+            menu.innerHTML=
+                'ファビコンのサイズ　<input id="fav_size" type="number" step="8" min="16" max="64">'+
+                '<style>'+
+                '#fav_menu { position: absolute; top: 30%; left: calc(50% - 120px); '+
+                'padding: 10px 20px; background: #fff; font: normal 16px Meiryo; } '+
+                '#fav_size { width: 60px; padding: 2px 0 0; font: normal 16px Meiryo; text-align: center; } '+
+                '</style>';
+
+            if(!document.querySelector('#fav_menu')){
+                document.querySelector('body').appendChild(menu); }}
+
+
+
+function get_favicon(){
+    let f_size; // ファビコンの指定サイズ
+    let fav_request; // ファビコンを取得するためのURL
+
+    f_size=get_cookie('favicon_size');
+    if(f_size==0){
+        f_size=16; } // クッキーが無い場合のデフォルト設定
+    document.cookie='favicon_size='+ f_size +'; Max-Age=2592000'; // Cookieの更新
+
+    let fav_size_input=document.querySelector('#fav_size');
+    if(fav_size_input){
+       fav_size_input.value=f_size;
+
+        fav_size_input.onchange=function(event){
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            f_size=fav_size_input.value;
+            document.cookie='favicon_size='+ f_size +'; Max-Age=2592000'; } // Cookieの更新
+
+        document.addEventListener('keydown', function(event){
+            if(event.keyCode==13){
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                let que=page_location.split('&');
+                if(que[que.length-1] && que[que.length-1].indexOf('size=')==0){
+                    que.pop();
+                    fav_request=que.join('&') +'&size='+ f_size;
+                    location.href= fav_request; }
+            }}); }
+
+
+   function get_cookie(name){
+        let cookie_req=document.cookie.split('; ').find(row=>row.startsWith(name));
+        if(cookie_req){
+            if(cookie_req.split('=')[1]==null){
+                return 0; }
+            else{
+                return cookie_req.split('=')[1]; }}
+        if(!cookie_req){
+            return 0; }}
+
+} // get_favicon()
