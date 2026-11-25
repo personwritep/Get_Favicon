@@ -119,6 +119,9 @@ function main(page_location){
         '#fav_size::-webkit-inner-spin-button { -webkit-appearance: auto; } '+
         '#gf_help { height: 18px; width: 18px; margin: 0 0 -4px 8px; padding: 0; fill: #777; '+
         'vertical-align: 0; cursor: pointer; display: inline; }'+
+
+        'body > P, body > svg, body>a { display: none; } '+
+        'svg { display: revert; margin: 0; opacity: 1; } '+
         '</style></div>';
 
     if(!document.querySelector('.fav_div')){
