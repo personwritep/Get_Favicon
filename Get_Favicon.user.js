@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Get Favicon 🔵
 // @namespace        http://tampermonkey.net/
-// @version        0.8
+// @version        0.9
 // @description        各種のサイトでファビコンを取得 「F2」でポップアップを表示
 // @author        You
 // @match        https://*/*
